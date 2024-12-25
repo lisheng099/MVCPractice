@@ -1,0 +1,18 @@
+﻿@{
+    var currentRole = ViewData["CurrentRole"] as string;
+    var roles = ViewData["Roles"] as List<string>;
+}
+
+<select id="Role" name="Role" class="form-control">
+    @foreach (var role in roles)
+    {
+        @if (role == currentRole)
+        {
+            <option value="@role" selected >@role</option>
+        }
+        else
+        {
+            <option value="@role" >@role</option>
+        }
+    }
+</select>

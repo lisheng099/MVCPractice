@@ -1,0 +1,21 @@
+﻿@using MVCPractice.Models.Activities
+@model List<ActivityCategory>
+
+@{
+    var currentActivityCategoryId = ViewData["CurrentActivityCategoryId"] as string;
+    var ActivityCategoryDropDownId = ViewData["ActivityCategoryDropDownId"] as string;
+}
+
+<select id="@ActivityCategoryDropDownId" name="@ActivityCategoryDropDownId" class="form-control">
+    @foreach (var item in Model)
+    {
+        @if (item.Id.ToString() == currentActivityCategoryId)
+        {
+            <option value="@item.Id" selected>@item.Name</option>
+        }
+        else
+        {
+            <option value="@item.Id" >@item.Name</option>
+        }
+    }
+</select>

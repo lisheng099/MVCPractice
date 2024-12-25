@@ -1,0 +1,146 @@
+﻿@using MVCPractice.ViewModels.Account
+
+@model RegisterViewModel
+
+<h2>註冊</h2>
+
+
+<form id="registerForm" method="post" asp-controller="Account" asp-action="Register">
+    <div id="step1" class="step">
+        <h3>步驟 1: 條款</h3>
+        @if (Model.registerTermViewModel != null){
+            @foreach (var item in Model.registerTermViewModel)
+            {
+                <div class="ck-content">
+                    @Html.Raw(item.TermTexts)
+                </div>
+                <div class="form-group">
+                    <input asp-for="@item.AgreeToTerms" type="checkbox" class="form-check-input" />
+                    <label asp-for="@item.AgreeToTerms" class="form-check-label">我同意上述條款</label>
+                    <span asp-validation-for="@item.AgreeToTerms" class="text-danger"></span>
+                    <input type="hidden" asp-for="@item.TermTexts" />
+                </div>
+            }
+        }
+    </div>
+    <div id="step2" class="step" >
+        <h3>步驟 2: 個人資料</h3>
+        <div class="form-group">
+            <label asp-for="Name" class="control-label">姓名</label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Birthday" class="control-label">生日</label>
+            <input asp-for="Birthday" class="form-control" />
+            <span asp-validation-for="Birthday" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Gender" class="control-label">性別</label>
+            <select asp-for="Gender" class="form-control">
+                <option value="">請選擇</option>
+                <option value="男">男</option>
+                <option value="女">女</option>
+                <option value="其他">其他</option>
+            </select>
+            <span asp-validation-for="Gender" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="IdNumber" class="control-label">身分證字號</label>
+            <input asp-for="IdNumber" class="form-control" />
+            <span asp-validation-for="IdNumber" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Profession" class="control-label">職業</label>
+            <input asp-for="Profession" class="form-control" />
+            <span asp-validation-for="Profession" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Education" class="control-label">學歷</label>
+            <select asp-for="Education" class="form-control">
+                <option value="">請選擇</option>
+                <option value="小學">小學</option>
+                <option value="國(初)中">國(初)中</option>
+                <option value="高中(職)">高中(職)</option>
+                <option value="專科">專科</option>
+                <option value="大學(專)">大學(專)</option>
+                <option value="碩士以上">碩士以上</option>
+            </select>
+            <span asp-validation-for="Education" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Marriage" class="control-label">婚姻狀況</label>
+            <select asp-for="Marriage" class="form-control">
+                <option value="">請選擇</option>
+                <option value="未婚">未婚</option>
+                <option value="已婚">已婚</option>
+                <option value="再婚">再婚</option>
+                <option value="同居">同居</option>
+                <option value="離婚">離婚</option>
+                <option value="喪偶">喪偶</option>
+            </select>
+            <span asp-validation-for="Marriage" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Religion" class="control-label">宗教</label>
+            <div class="input-group">
+                <select asp-for="Religion" class="form-control" id="Religion">
+                    <option value="">請選擇</option>
+                    <option value="無">無</option>
+                    <option value="佛教">佛教</option>
+                    <option value="道教">道教</option>
+                    <option value="一貫道">一貫道</option>
+                    <option value="民間信仰">民間信仰</option>
+                    <option value="天主教">天主教</option>
+                    <option value="基督教">基督教</option>
+                    <option value="其他">其他</option>
+                </select>
+                <input type="text" class="form-control" id="OtherReligion" style="display: none;" />
+            </div>
+            <span asp-validation-for="Religion" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Phone" class="control-label">手機</label>
+            <input asp-for="Phone" class="form-control" />
+            <span asp-validation-for="Phone" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="LandlinePhone" class="control-label">市話</label>
+            <input asp-for="LandlinePhone" class="form-control" />
+            <span asp-validation-for="LandlinePhone" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Address" class="control-label">地址</label>
+            <input asp-for="Address" class="form-control" />
+            <span asp-validation-for="Address" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Email" class="control-label">電子信箱</label>
+            <input asp-for="Email" class="form-control" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div id="step3" class="step" >
+        <h3>步驟 3: 帳號資訊</h3>
+        <div class="form-group">
+            <label asp-for="Username" class="control-label">帳號</label>
+            <input asp-for="Username" class="form-control" />
+            <span asp-validation-for="Username" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Password" class="control-label"></label>
+            <input asp-for="Password" class="form-control" />
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="ConfirmPassword" class="control-label">確認密碼</label>
+            <input type="password" id="ConfirmPassword" name="ConfirmPassword" class="form-control" />
+            <span id="ConfirmPasswordError" class="text-danger"></span>
+        </div>
+        <button type="submit" class="btn btn-primary">註冊</button>
+    </div>
+</form>
+

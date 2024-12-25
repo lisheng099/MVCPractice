@@ -1,0 +1,44 @@
+﻿@using MVCPractice.ViewModels.Sysadm
+@model IEnumerable<MembersViewModel>
+
+<h2>會員清單</h2>
+
+<form asp-action="Members" method="get" class="form-inline">
+    <div class="form-group">
+        <label for="searchTerm">Search:</label>
+        <input type="text" id="searchTerm" name="searchTerm" class="form-control" value="@ViewData["searchTerm"]" />
+    </div>
+    <button type="submit" class="btn btn-primary">Search</button>
+</form>
+
+@if (Model != null && Model.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td>@user.UserName</td>
+                    <td>@user.Name</td>
+                    <td>
+                        <form method="get" asp-controller="Sysadm" asp-action="EditProfile">
+                            <input type="hidden" name="UserName" value="@user.UserName" />
+                            <button type="submit" class="btn btn-secondary">Edit</button>
+                        </form>
+                        <form method="post" asp-controller="Sysadm" asp-action="ResetPassword">
+                            <input type="hidden" name="UserName" value="@user.UserName" />
+                            <button type="submit" class="btn btn-danger">Reset Password</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

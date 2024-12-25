@@ -1,0 +1,26 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using MVCPractice.Areas.Identity.Data
+
+@inject SignInManager<MVCPracticeUser> SignInManager
+@inject UserManager<MVCPracticeUser> UserManager
+
+<ul class="navbar-nav">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <li class="nav-item">
+            <a id="manage" class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @UserManager.GetUserName(User)!</a>
+        </li>
+        <li class="nav-item">
+            <a asp-area="" asp-controller="Account" asp-action="Logout">登出</a>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+                <a asp-area="" asp-controller="Account" asp-action="Register">註冊</a>
+        </li>
+        <li class="nav-item">
+                <a asp-area="" asp-controller="Account" asp-action="Login">登入</a>
+        </li>
+    }
+</ul>
