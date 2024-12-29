@@ -130,7 +130,6 @@ namespace MVCPractice.Controllers
             return RedirectToAction("Members");
         }
 
-
         [HttpGet]
         public async Task<IActionResult> MemberRoles(string Role)
         {
