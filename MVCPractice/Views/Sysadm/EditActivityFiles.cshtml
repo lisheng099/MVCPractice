@@ -1,0 +1,83 @@
+﻿@using MVCPractice.Dtos.Activities
+@model IEnumerable<ActivityFileDto>
+
+
+<div class="container mt-3">
+    <h4>Upload and Preview Files</h4>
+    <input type="file" id="fileUpload" name="file[]" multiple accept="file/*" class="form-control mb-3">
+    <div id="filePreview" class="d-flex flex-wrap"></div>
+    <button id="saveFiles" class="btn btn-primary mt-3">Save Files</button>
+</div>
+
+@if (Model != null && Model.Any())
+{
+    @foreach (var item in Model)
+    {
+        @Html.Partial("EditActivityFileBlock", item)
+    }
+}
+
+
+<script>
+    $(document).ready(function () {
+        let filesArray = [];
+
+        $('#fileUpload').on('change', function () {
+            const files = this.files;
+            if (files) {
+                $.each(files, function (index, file) {
+                    filesArray.push(file);
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const img = $('<img src="' + e.target.result + '" class="preview-img">');
+                        const removeBtn = $('<button class="remove-btn">&times;</button>');
+                        removeBtn.on('click', function () {
+                            const index = filesArray.indexOf(file);
+                            if (index > -1) {
+                                filesArray.splice(index, 1);
+                            }
+                            imgContainer.remove();
+                        });
+
+                        const imgContainer = $('<div class="file-container"></div>').append(img).append(removeBtn);
+                        $('#filePreview').append(imgContainer);
+                    }
+                    reader.readAsDataURL(file);
+                });
+            }
+        });
+
+        $('#saveFiles').on('click', function () {
+            const formData = new FormData();
+            const token = $('input[name="__RequestVerificationToken"]').val();
+            formData.append('__RequestVerificationToken', token);
+
+            $.each(filesArray, function (index, file) {
+                formData.append('files', file);
+            });
+
+            const searchParams = new URLSearchParams(window.location.search);
+            const ActivityId = searchParams.get('ActivityId');
+
+            formData.append('ActivityId', ActivityId);
+
+            $.ajax({
+                url: '@Url.Action("UploadActivityFiles", "Sysadm")',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    alert('Files saved successfully.');
+                    filesArray = [];
+                    $('#filePreview').empty();
+                    location.reload();
+                },
+                error: function (response) {
+                    alert('Failed to save Files.');
+                }
+            });
+        });
+    });
+
+</script>

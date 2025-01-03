@@ -18,8 +18,6 @@ namespace MVCPractice.Models
         {
         }
 
-        public DbSet<MVCPracticeUser> ApplicationUsers { get; set; }
-
         public virtual DbSet<RegisterTerm> RegisterTerms { get; set; }
         public virtual DbSet<ActivityData> ActivityDatas { get; set; }
         public virtual DbSet<ActivityImage> ActivityImages { get; set; }

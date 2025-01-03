@@ -5,15 +5,17 @@ using MVCPractice.servers;
 namespace MyMvcWebsite.Views.Shared.Components.ActivityCategoryViewComponent
 {
     public class ActivityCategoryDropDownViewComponent(
-        IMVCPracticeDBServices MVCPracticeDBServices) : ViewComponent
+        IActivityService activityService) : ViewComponent
     {
-        private readonly IMVCPracticeDBServices _MVCPracticeDBServices = MVCPracticeDBServices;
+        private readonly IActivityService _activityService = activityService;
 
         public async Task<IViewComponentResult> InvokeAsync(String ActivityCategoryDropDownId, String ActivityCategoryId)
         {
             ViewData["ActivityCategoryDropDownId"] = ActivityCategoryDropDownId;
             ViewData["CurrentActivityCategoryId"] = ActivityCategoryId;
-            return View(_MVCPracticeDBServices.GetActivityCategories());
+            var activityCategories = await _activityService.GetActivityCategories();
+
+            return View(activityCategories);
         }
     }
 }

@@ -1,0 +1,15 @@
+﻿@using MVCPractice.Dtos.Activities
+@model List<ActivityInfoDto>
+
+<h2>活動列表</h2>
+@if (Model != null && Model.Any())
+{
+<div class="acticiy_vector">
+    @foreach (var item in Model)
+    { 
+         <div class="ViewActivityInfoBlock">
+            @Html.Partial("ViewActivityInfoBlock", item)           
+        </div>
+    }
+</div>
+}

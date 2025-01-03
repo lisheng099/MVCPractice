@@ -3,20 +3,26 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MVCPractice.Areas.Identity.Data;
+using MVCPractice.Dtos.Activities;
+using MVCPractice.Dtos.Sysadm;
+using MVCPractice.Interfaces;
 using MVCPractice.ViewModels.Account;
+using MVCPractice.ViewModels.Activities;
 using MVCPractice.ViewModels.Sysadm;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 
 namespace MVCPractice.Controllers
 {
     public class SysadmController(ILogger<AccountController> logger,
         UserManager<MVCPracticeUser> userManager,
-        RoleManager<IdentityRole> roleManager) : Controller
+        RoleManager<IdentityRole> roleManager,
+        IAccountService accountViewModelService,
+        IActivityService activityService) : Controller
     {
         private readonly UserManager<MVCPracticeUser> _userManager = userManager;
         private readonly RoleManager<IdentityRole> _roleManager = roleManager;
+        private readonly IAccountService _accountService = accountViewModelService;
+        private readonly IActivityService _activityService = activityService;
 
         [Authorize(Roles = "Admin")]
         public IActionResult Index()
@@ -178,6 +184,184 @@ namespace MVCPractice.Controllers
             await _userManager.RemoveFromRoleAsync(user, Role);
 
             return RedirectToAction("MemberRoles", new { Role });
+        }
+
+        [HttpGet]
+        public IActionResult RegisterTerms()
+        {
+            List<EditRegisterTermDto> model = _accountService.GetRegisterTermsList();
+            return View(model);
+        }
+
+        [HttpPost]
+        public IActionResult AddRegisterTerm()
+        {
+            _accountService.AddRegisterTerm();
+            return RedirectToAction("RegisterTerms");
+        }
+
+        [HttpGet]
+        public IActionResult EditRegisterTerm(int RegisterTermId)
+        {
+            EditRegisterTermDto registerTerm = _accountService.GetRegisterTermById(RegisterTermId);
+            return View("EditRegisterTerm", registerTerm);
+        }
+
+        [HttpPost]
+        public IActionResult EditRegisterTerm(EditRegisterTermDto editRegisterTermDto)
+        {
+            _accountService.UpdateRegisterTerm(editRegisterTermDto);
+            return RedirectToAction("RegisterTerms");
+        }
+
+        [HttpPost]
+        public IActionResult SwitchRegisterTermEnabled(int RegisterTermId)
+        {
+            _accountService.SwitchRegisterTermEnabled(RegisterTermId);
+            return RedirectToAction("RegisterTerms");
+        }
+
+        [HttpGet]
+        public IActionResult Activities()
+        {
+            List<ActivityInfoDto> model = _activityService.GetActivityInfos();
+            return View(model);
+        }
+
+        [HttpGet]
+        public IActionResult AddActivity()
+        {
+            ActivitiyViewModel activities = new ActivitiyViewModel
+            {
+                ActivityDataDto = new ActivityDataDto()
+                {
+                    Id = -1,
+                    RegistrationStartDateTime = DateTime.Now,
+                    RegistrationEndDateTime = DateTime.Now,
+                    StartDateTime = DateTime.Now,
+                    EndDateTime = DateTime.Now,
+                    CreatedDateTime = DateTime.Now,
+                    CreatedUserName = User.Identity.Name
+                }
+            };
+            return View("EditActivity", activities);
+        }
+
+        [HttpGet]
+        public IActionResult EditActivityById(int ActivityId)
+        {
+            ActivitiyViewModel activities = _activityService.GetActivitiesByActivityId(ActivityId);
+            return View("EditActivity", activities);
+        }
+
+        [HttpPost]
+        public IActionResult SwitchActivityEnabledById(int ActivityId)
+        {
+            _activityService.SwitchActivityEnabledById(ActivityId);
+            return RedirectToAction("Activities");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult EditActivityData(ActivityDataDto activityData)
+        {
+            if (_activityService.GetActivityDataByActivityId(activityData.Id) != null)
+            {
+                activityData.UpdatedDateTime = DateTime.Now;
+                activityData.UpdatedUserName = _userManager.GetUserName(User);
+                _activityService.UpdateActivityData(activityData);
+                return RedirectToAction("EditActivityById", new { ActivityId = activityData.Id });
+            }
+            else if (activityData.Name != null)
+            {
+                activityData.CreatedDateTime = DateTime.Now;
+                activityData.CreatedUserName = _userManager.GetUserName(User);
+                activityData.Id = _activityService.UpdateActivityData(activityData);
+                return RedirectToAction("EditActivityById", new { ActivityId = activityData.Id });
+            }
+            else
+            {
+                return View("EditActivity", new ActivitiyViewModel() { ActivityDataDto = activityData });
+            }
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UploadActivityImages(int ActivityId, List<IFormFile> images)
+        {
+            if (images == null || images.Count == 0)
+            {
+                return BadRequest("No files received.");
+            }
+            await UploadActivityImages(ActivityId, images);
+            return Ok();
+        }
+
+        [HttpPost]
+        public IActionResult EditActivityImage(ActivityImageDto ActivityImage)
+        {
+            if (ModelState.IsValid)
+            {
+                _activityService.UpdateActivityImage(ActivityImage);
+            }
+
+            return RedirectToAction("EditActivityById", new { ActivityId = ActivityImage.ActivityId });
+        }
+
+        [HttpPost]
+        public IActionResult DeleteActivityImageById(int ActivityId, int ActivityImageId)
+        {
+            if (ModelState.IsValid)
+            {
+                _activityService.DeleteActivityImageById(ActivityImageId);
+            }
+
+            return RedirectToAction("EditActivityById", new { ActivityId = ActivityId });
+        }
+
+        [HttpPost]
+        public IActionResult SwitchActivityImageIsCoverById(int ActivityId, int ActivityImageId)
+        {
+            _activityService.SwitchActivityImageIsCoverById(ActivityImageId);
+
+            return RedirectToAction("EditActivityById", new { ActivityId = ActivityId });
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult UploadActivityFiles(int ActivityId, List<IFormFile> files)
+        {
+
+            if (files == null || files.Count == 0)
+            {
+                return BadRequest("No files received.");
+            }
+            _activityService.UploadActivityFiles(ActivityId, files);
+            return RedirectToAction("EditActivityById", new { ActivityId = ActivityId });
+        }
+
+        [HttpPost]
+        public IActionResult EditActivityFile(ActivityFileDto ActivityFile)
+        {
+            if (ModelState.IsValid)
+            {
+                _activityService.UpdateActivityFile(ActivityFile);
+            }
+
+            return RedirectToAction("EditActivityById", new { ActivityId = ActivityFile.ActivityId });
+        }
+
+        [HttpPost]
+        public IActionResult DeleteActivityFileById(int ActivityId, int ActivityFileId)
+        {
+            if (ModelState.IsValid)
+            {
+                _activityService.DeleteActivityFileById(ActivityFileId);
+            }
+
+            return RedirectToAction("EditActivityById", new { ActivityId = ActivityId });
         }
     }
 }

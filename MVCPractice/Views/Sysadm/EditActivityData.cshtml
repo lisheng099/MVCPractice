@@ -1,0 +1,108 @@
+﻿@using MVCPractice.Dtos.Activities
+@model ActivityDataDto
+
+
+
+<h2>編輯活動內容</h2>
+
+<form method="post" asp-controller="Sysadm" asp-action="EditActivityData">
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="form-group">
+        <label asp-for="Id" class="control-label">編號</label>
+        <input asp-for="Id" class="form-control" readonly />
+        <span asp-validation-for="Id" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Name" class="control-label">名稱</label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="OrderIndex" class="control-label">排序值</label>
+        <input asp-for="OrderIndex" class="form-control" />
+        <span asp-validation-for="OrderIndex" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label class="control-label">活動類別</label>
+        @await Component.InvokeAsync("ActivityCategoryDropDown", new { ActivityCategoryDropDownId = "CategoryId", ActivityCategoryId = Model.CategoryId.ToString() })
+    </div>
+    <div class="form-group">
+        <label asp-for="PersonsNumber" class="control-label">需求人數</label>
+        <input asp-for="PersonsNumber" class="form-control" />
+        <span asp-validation-for="PersonsNumber" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Introduce" class="control-label">簡介</label>
+        <textarea asp-for="Introduce" rows="5" cols="50" class="form-control"></textarea>
+        <span asp-validation-for="Introduce" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Content" class="control-label">內容</label>
+        <textarea asp-for="Content" rows="5" cols="50" class="form-control" id="editor"></textarea>
+        <span asp-validation-for="Content" class="text-danger"></span>
+    </div>
+    <div class ="form-group">
+        <input asp-for="Enabled" type="checkbox" class="form-check-label" />
+        <label asp-for="Enabled" class="form-check-label">啟用</label>
+        <span asp-validation-for="Enabled" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="RegistrationStartDateTime" class="control-label">報名開始時間</label>
+        <input asp-for="RegistrationStartDateTime" class="form-control" />
+        <span asp-validation-for="RegistrationStartDateTime" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="RegistrationEndDateTime" class="control-label">報名結束時間</label>
+        <input asp-for="RegistrationEndDateTime" class="form-control" />
+        <span asp-validation-for="RegistrationEndDateTime" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="StartDateTime" class="control-label">活動開始時間</label>
+        <input asp-for="StartDateTime" class="form-control" />
+        <span asp-validation-for="StartDateTime" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="EndDateTime" class="control-label">活動結束時間</label>
+        <input asp-for="EndDateTime" class="form-control" />
+        <span asp-validation-for="EndDateTime" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="CreatedDateTime" class="control-label">建立時間</label>
+        <input asp-for="CreatedDateTime" class="form-control" readonly />
+        <span asp-validation-for="CreatedDateTime" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="CreatedUserName" class="control-label">建立人員</label>
+        <input asp-for="CreatedUserName" class="form-control" readonly />
+        <span asp-validation-for="CreatedUserName" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="UpdatedDateTime" class="control-label">更新時間</label>
+        <input asp-for="UpdatedDateTime" class="form-control" readonly />
+        <span asp-validation-for="UpdatedDateTime" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="UpdatedUserName" class="control-label">更新人員</label>
+        <input asp-for="UpdatedUserName" class="form-control" readonly />
+        <span asp-validation-for="UpdatedUserName" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-secondary">提交</button>
+</form>
+
+
+<link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/42.0.0/ckeditor5.css" />
+<link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5-premium-features/42.0.0/ckeditor5-premium-features.css" />
+<script type="importmap">
+    {
+        "imports": {
+            "ckeditor5": "https://cdn.ckeditor.com/ckeditor5/42.0.0/ckeditor5.js",
+            "ckeditor5/": "https://cdn.ckeditor.com/ckeditor5/42.0.0/",
+            "ckeditor5-premium-features": "https://cdn.ckeditor.com/ckeditor5-premium-features/42.0.0/ckeditor5-premium-features.js",
+            "ckeditor5-premium-features/": "https://cdn.ckeditor.com/ckeditor5-premium-features/42.0.0/"
+        }
+    }
+</script>
+<script type="module" src="~/assets/vendor/ckeditor.js"></script>
+
+
+

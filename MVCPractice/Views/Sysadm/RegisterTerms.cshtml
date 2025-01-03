@@ -1,0 +1,56 @@
+﻿@using MVCPractice.Dtos.Sysadm
+@model IEnumerable<EditRegisterTermDto>
+
+<h2>註冊訊息清單</h2>
+
+<form asp-action="AddRegisterTerm" method="post" class="form-inline">
+    <button type="submit" class="btn btn-primary">新增</button>
+</form>
+
+@if (Model != null && Model.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>OrderIndex</th>
+                <th>ArticleId</th>
+                <th>Enabled</th>
+                <th>CreatedDateTime</th>
+                <th>UpdatedDateTime</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var RegisterTerm in Model)
+            {
+                <tr>
+                    <td>@RegisterTerm.Id</td>
+                    <td>@RegisterTerm.OrderIndex</td>
+                    <td>@RegisterTerm.Content</td>
+                    <td>@RegisterTerm.Enabled</td>
+                    <td>@RegisterTerm.CreatedDateTime</td>
+                    <td>@RegisterTerm.UpdatedDateTime</td>
+                    <td>
+                        <form method="get" asp-controller="Sysadm" asp-action="EditRegisterTerm">
+                            <input type="hidden" name="RegisterTermId" value="@RegisterTerm.Id" />
+                            <button type="submit" class="btn btn-secondary">編輯</button>
+                        </form>
+                        <form method="post" asp-controller="Sysadm" asp-action="SwitchRegisterTermEnabled">
+                            <input type="hidden" name="RegisterTermId" value="@RegisterTerm.Id" />
+                            <input type="hidden" name="RegisterTermEnabled" value="@RegisterTerm.Enabled" />
+                            @if (@RegisterTerm.Enabled)
+                            {
+                                <button type="submit" class="btn btn-secondary">停用</button>
+                            }
+                            else
+                            {
+                                <button type="submit" class="btn btn-secondary">啟用</button>
+                            }
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

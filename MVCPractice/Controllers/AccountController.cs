@@ -1,14 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using MVCPractice.Areas.Identity.Data;
-using MVCPractice.Dtos.Account;
 using MVCPractice.Interfaces;
-using MVCPractice.Models.Account;
-using MVCPractice.servers;
 using MVCPractice.ViewModels.Account;
-using System.Drawing;
-using System.Net;
 
 namespace MVCPractice.Controllers
 {
@@ -17,15 +11,13 @@ namespace MVCPractice.Controllers
         UserManager<MVCPracticeUser> userManager,
         RoleManager<IdentityRole> roleManager,
         SignInManager<MVCPracticeUser> signInManager,
-        IMVCPracticeDBServices MVCPracticeDBServices,
-        IAccountViewModelService accountViewModelService) : Controller
+        IAccountService accountService) : Controller
     {
         private readonly ILogger<AccountController> _logger = logger;
         private readonly UserManager<MVCPracticeUser> _userManager = userManager;
         private readonly RoleManager<IdentityRole> _roleManager = roleManager;
         private readonly SignInManager<MVCPracticeUser> _signInManager = signInManager;
-        private readonly IMVCPracticeDBServices _MVCPracticeDBServices = MVCPracticeDBServices;
-        private readonly IAccountViewModelService _accountViewModelService = accountViewModelService;
+        private readonly IAccountService _accountService = accountService;
 
 
         public IActionResult Index()
@@ -36,8 +28,7 @@ namespace MVCPractice.Controllers
         [HttpGet]
         public IActionResult Register()
         {
-            List<RegisterTermDto> registerTermDtoList = _MVCPracticeDBServices.GetRegisterTermDtoList();
-            RegisterViewModel registerViewModel = _accountViewModelService.GetRegisterViewModel(registerTermDtoList);
+            RegisterViewModel registerViewModel = _accountService.GetRegisterViewModel();
 
             return View(registerViewModel);
         }

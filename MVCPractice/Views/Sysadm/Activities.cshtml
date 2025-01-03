@@ -1,0 +1,128 @@
+﻿@using MVCPractice.Dtos.Activities
+@model IEnumerable<ActivityInfoDto>
+
+<h2>活動列表</h2>
+
+<div class="row">
+    <div class="row col-12 col-md-10 justify-content-end">
+        <form method="get" asp-controller="Sysadm" asp-action="AddActivity">
+            <button type="submit" class="btn  btn-sm btn-primary fixed-height-button">新增項目</button>
+        </form>
+    </div>
+    <div class="row col-12 col-md-10 justify-content-end">
+        <form asp-action="Index" class="col-12 col-md-4 ">
+            <div class="input-group input-group-sm ">
+                <input class="form-control" type="text" placeholder="Name" name="searchString" />
+                <input class="btn btn-sm btn-primary" type="submit" value="Search" />
+            </div>
+        </form>
+    </div>
+</div>
+
+
+@if (Model != null && Model.Any())
+{
+    <div class="" style="min-height:45vh">
+        <table class="table table-index">
+            <thead>
+                <tr>
+                    <th>活動名稱</th>
+                    <th>活動類別</th>
+                    <th>報名人數</th>
+                    <th>需求人數</th>
+                    <th>狀態</th>
+                    <th>活動開始時間</th>
+                    <th>活動結束時間</th>
+                    <th>動作</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var Activity in Model)
+                {
+                    <tr>
+                        <td>@Activity.Name</td>
+                        <td>@Activity.CategoryId</td>
+                        <td>@Activity.ParticipatedPersonsNumber</td>
+                        <td>@Activity.PersonsNumber</td>
+                        @if (Activity.Enabled) 
+                        {
+                            <td>啟用</td>
+                        }
+                        else
+                        {
+                            <td>停用</td>
+                        }
+                        <td>@Activity.StartDateTime</td>
+                        <td>@Activity.EndDateTime</td>
+                        <td>
+                            <div class="form-container">
+                                <form method="get" asp-controller="Sysadm" asp-action="EditActivityById">
+                                    <input type="hidden" name="ActivityId" value="@Activity.Id" />
+                                    <button type="submit" class="btn btn-secondary">編輯</button>
+                                </form>
+                                <form method="post" asp-controller="Sysadm" asp-action="SwitchActivityEnabledById">
+                                    <input type="hidden" name="ActivityId" value="@Activity.Id" />
+                                    <input type="hidden" name="ActivityEnabled" value="@Activity.Enabled" />
+                                    @if (@Activity.Enabled)
+                                    {
+                                        <button type="submit" class="btn btn-secondary">停用</button>
+                                    }
+                                    else
+                                    {
+                                        <button type="submit" class="btn btn-secondary">啟用</button>
+                                    }
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+<style>
+    table.table-index {
+        table-layout: fixed;
+    }
+
+    .name {
+        width: 40%;
+    }
+
+    .description {
+        width: 20%;
+    }
+
+    .overflow-text {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+        overflow: hidden;
+    }
+
+    .price, .stock {
+        width: 10%;
+    }
+
+    .control {
+        width: auto;
+    }
+
+    .form-container {
+        display: flex;
+        gap: 10px; 
+    }
+
+    .fixed-height-button {
+        height: 30px; 
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        display: flex;
+        padding: 0; 
+        font-size: 14px; 
+        white-space: nowrap;
+    }
+
+</style>

@@ -1,0 +1,56 @@
+﻿@using MVCPractice.Dtos.Activities
+@model ActivityImageDto
+
+<form method="post" asp-controller="Sysadm" asp-action="EditActivityImage">
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="form-group">
+        <label asp-for="Id" class="control-label"></label>
+        <input asp-for="Id" class="form-control" readonly />
+        <span asp-validation-for="Id" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="ActivityId" class="control-label"></label>
+        <input asp-for="ActivityId" class="form-control" />
+        <span asp-validation-for="ActivityId" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Name" class="control-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+    <div class="form-group" readonly>
+        <input asp-for="IsCover" type="checkbox" class="form-check-label" readonly />
+        <label asp-for="IsCover" class="form-check-label" >首頁</label>
+        <span asp-validation-for="IsCover" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="OrderIndex" class="control-label"></label>
+        <input asp-for="OrderIndex" class="form-control" />
+        <span asp-validation-for="OrderIndex" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <img src="@Model.Url" alt="Url" class="activity-image-img" width="200">
+        <span asp-validation-for="Url" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-secondary">儲存</button>
+</form>
+
+<form method="post" asp-controller="Sysadm" asp-action="DeleteActivityImageById">
+    <input type="hidden" name="ActivityId" value="@Model.ActivityId" />
+    <input type="hidden" name="ActivityImageId" value="@Model.Id" />
+    <button type="submit" class="btn btn-secondary">刪除</button>
+</form>
+<form method="post" asp-controller="Sysadm" asp-action="SwitchActivityImageIsCoverById">
+    <input type="hidden" name="ActivityId" value="@Model.ActivityId" />
+    <input type="hidden" name="ActivityImageId" value="@Model.Id" />
+    <input type="hidden" name="ActivityImageIsCover" value="@Model.IsCover" />
+    @if (@Model.IsCover)
+    {
+        <button type="submit" class="btn btn-secondary">封面</button>
+    }
+    else
+    {
+        <button type="submit" class="btn btn-secondary">設為封面</button>
+    }
+</form>

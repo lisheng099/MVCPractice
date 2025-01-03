@@ -1,0 +1,41 @@
+﻿@using MVCPractice.Dtos.Activities
+@model ActivityFileDto
+
+<form method="post" asp-controller="Sysadm" asp-action="EditActivityFile">
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="form-group">
+        <label asp-for="Id" class="control-label"></label>
+        <input asp-for="Id" class="form-control" readonly />
+        <span asp-validation-for="Id" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="ActivityId" class="control-label"></label>
+        <input asp-for="ActivityId" class="form-control" />
+        <span asp-validation-for="ActivityId" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Name" class="control-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="OrderIndex" class="control-label"></label>
+        <input asp-for="OrderIndex" class="form-control" />
+        <span asp-validation-for="OrderIndex" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <a href="@Model.Url" download class="activity-image-download">
+            Download File
+        </a>
+        <span asp-validation-for="Url" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-secondary">儲存</button>
+</form>
+
+<form method="post" asp-controller="Sysadm" asp-action="DeleteActivityFileById">
+    <input type="hidden" name="ActivityId" value="@Model.ActivityId" />
+    <input type="hidden" name="ActivityFileId" value="@Model.Id" />
+    <button type="submit" class="btn btn-secondary">刪除</button>
+</form>
+

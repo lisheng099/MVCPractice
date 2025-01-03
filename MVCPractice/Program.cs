@@ -1,16 +1,13 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MVCPractice.Areas.Identity.Data;
-using MVCPractice.Data;
 using MVCPractice.Interfaces;
 using MVCPractice.Models;
-using MVCPractice.Models.Account;
 using MVCPractice.servers;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("MVCPracticeDBContextConnection") ?? throw new InvalidOperationException("Connection string 'MVCPracticeDBContextConnection' not found.");
 
-builder.Services.AddDbContext<MVCPracticeContext>(options => options.UseSqlServer(connectionString));
 builder.Services.AddDbContext<MVCPracticeDBContext>(options => options.UseSqlServer(connectionString));
 
 builder.Services.AddIdentity<MVCPracticeUser, IdentityRole>().AddEntityFrameworkStores<MVCPracticeDBContext>().AddDefaultTokenProviders();
@@ -28,8 +25,8 @@ builder.Services.AddSession(options =>
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddTransient<IMVCPracticeDBServices, MVCPracticeDBServices>();
-builder.Services.AddTransient<IAccountViewModelService, AccountViewModelService>();
+builder.Services.AddTransient<IAccountService, AccountService>();
+builder.Services.AddTransient<IActivityService, ActivityService>();
 
 var app = builder.Build();
 

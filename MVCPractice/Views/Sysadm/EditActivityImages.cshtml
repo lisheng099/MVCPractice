@@ -1,0 +1,107 @@
+﻿@using MVCPractice.Dtos.Activities
+@model IEnumerable<ActivityImageDto>
+
+
+<div class="container mt-3">
+    <h4>Upload and Preview Images</h4>
+    <input type="file" id="imageUpload" name="images[]" multiple accept="image/*" class="form-control mb-3">
+    <div id="imagePreview" class="d-flex flex-wrap"></div>
+    <button id="saveImages" class="btn btn-primary mt-3">Save Images</button>
+</div>
+
+@if (Model != null && Model.Any())
+{
+    @foreach (var item in Model)
+    {
+        @Html.Partial("EditActivityImageBlock", item)
+    }
+}
+
+<style>
+    .preview-img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        margin: 5px;
+        position: relative;
+    }
+
+    .remove-btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background: rgba(255, 0, 0, 0.7);
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+    .image-container {
+        position: relative;
+        display: inline-block;
+    }
+</style>
+
+<script>
+    $(document).ready(function () {
+        let imagesArray = [];
+
+        $('#imageUpload').on('change', function () {
+            const files = this.files;
+            if (files) {
+                $.each(files, function (index, file) {
+                    imagesArray.push(file);
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const img = $('<img src="' + e.target.result + '" class="preview-img">');
+                        const removeBtn = $('<button class="remove-btn">&times;</button>');
+                        removeBtn.on('click', function () {
+                            const index = imagesArray.indexOf(file);
+                            if (index > -1) {
+                                imagesArray.splice(index, 1);
+                            }
+                            imgContainer.remove();
+                        });
+
+                        const imgContainer = $('<div class="image-container"></div>').append(img).append(removeBtn);
+                        $('#imagePreview').append(imgContainer);
+                    }
+                    reader.readAsDataURL(file);
+                });
+            }
+        });
+
+        $('#saveImages').on('click', function () {
+            const formData = new FormData();
+            const token = $('input[name="__RequestVerificationToken"]').val();
+            formData.append('__RequestVerificationToken', token);
+
+            $.each(imagesArray, function (index, file) {
+                formData.append('images', file); 
+            });
+
+            const searchParams = new URLSearchParams(window.location.search);
+            const ActivityId = searchParams.get('ActivityId');
+            
+            formData.append('ActivityId', ActivityId);
+
+            $.ajax({
+                url: '@Url.Action("UploadActivityImages", "Sysadm")',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    alert('Images saved successfully.');
+                    imagesArray = [];
+                    $('#imagePreview').empty();
+                    location.reload();
+                },
+                error: function (response) {
+                    alert('Failed to save images.');
+                }
+            });
+        });
+    });
+
+</script>
