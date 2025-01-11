@@ -2,281 +2,189 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using MVCPractice.Areas.Identity.Data;
+using MVCPractice.Dtos.Account;
 using MVCPractice.Dtos.Activities;
 using MVCPractice.Dtos.Sysadm;
 using MVCPractice.Interfaces;
+using MVCPractice.Models.Account;
 using MVCPractice.ViewModels.Account;
 using MVCPractice.ViewModels.Activities;
 using MVCPractice.ViewModels.Sysadm;
 using System.Data;
+using System.Security.Claims;
 
 namespace MVCPractice.Controllers
 {
-    public class SysadmController(ILogger<AccountController> logger,
-        UserManager<MVCPracticeUser> userManager,
-        RoleManager<IdentityRole> roleManager,
+    [Route("[controller]")]
+    [Authorize(Roles = "Admin")]
+    public class SysadmController(
         IAccountService accountViewModelService,
         IActivityService activityService) : Controller
     {
-        private readonly UserManager<MVCPracticeUser> _userManager = userManager;
-        private readonly RoleManager<IdentityRole> _roleManager = roleManager;
         private readonly IAccountService _accountService = accountViewModelService;
         private readonly IActivityService _activityService = activityService;
 
-        [Authorize(Roles = "Admin")]
-        public IActionResult Index()
-        {
-            return RedirectToRoute(new { controller = "Home", action = "Index" });
-        }
-
-        [HttpGet]
+        
+        [HttpGet("Members")]
         public async Task<IActionResult> Members(string searchTerm)
         {
-            IEnumerable<MembersViewModel> membersViewModels;
-            if (!string.IsNullOrEmpty(searchTerm)) 
-            {
-                membersViewModels = await _userManager.Users
-               .Where(u => u.UserName.Contains(searchTerm) || u.Name.Contains(searchTerm))
-               .Select(a => new MembersViewModel() { UserName = a.UserName, Name = a.Name }).ToListAsync();
-            }
-            else
-            {
-                membersViewModels = await _userManager.Users
-               .Select(a => new MembersViewModel() { UserName = a.UserName, Name = a.Name }).ToListAsync();
-            }
-
-            ViewData["searchTerm"] = searchTerm ;
-
-            return View(membersViewModels);
+            MembersViewModel model = await _accountService.GetMembersViewModel(searchTerm);
+            return View(model);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> EditProfile(String UserName = null)
+        [HttpGet("EditProfile/{id}")]
+        public async Task<IActionResult> EditProfile(String Id)
         {
-            MVCPracticeUser user = await _userManager.FindByNameAsync(UserName);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            HttpContext.Session.SetString("UserName", user.UserName);
-
-            EditProfileViewModel editProfileViewModel =
-                new EditProfileViewModel()
-                {
-                    UserName = user.UserName,
-                    Name = user.Name,
-                    Birthday = user.Birthday,
-                    Gender = user.Gender,
-                    IdNumber = user.IdNumber,
-                    Profession = user.Profession,
-                    Education = user.Education,
-                    Marriage = user.Marriage,
-                    Religion = user.Religion,
-                    LandlinePhone = user.LandlinePhone,
-                    Address = user.Address,
-                    PhoneNumber = user.PhoneNumber,
-                    Email = user.Email,
-                };
+            EditProfileViewModel editProfileViewModel = await _accountService.GetEditProfileViewModel(Id);
+            if(editProfileViewModel == null) { return NotFound("找不到該會員或沒有權限修改。"); }
             return View(editProfileViewModel);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> EditProfile(EditProfileViewModel model)
+        [HttpPost("EditProfile/{Id}")]
+        public async Task<IActionResult> EditProfile(String Id, EditProfileViewModel model)
         {
+            model.Id = Id;
             if (ModelState.IsValid)
             {
-                var user = await _userManager.FindByNameAsync(model.UserName);
-                if (user != null)
+                var result = await _accountService.EditProfile(model);
+                if (result.Succeeded)
                 {
-                    user.Email = model.Email;
-                    user.Name = model.Name;
-                    user.Birthday = model.Birthday;
-                    user.Gender = model.Gender;
-                    user.IdNumber = model.IdNumber;
-                    user.Profession = model.Profession;
-                    user.Education = model.Education;
-                    user.Marriage = model.Marriage;
-                    user.Religion = model.Religion;
-                    user.PhoneNumber = model.PhoneNumber;
-                    user.LandlinePhone = model.LandlinePhone;
-                    user.Address = model.Address;
-
-                    var result = await _userManager.UpdateAsync(user);
-                    if (!result.Succeeded)
-                    {
-                        return View(model);
-                    }
-
-                    return RedirectToAction("Members");
+                    return RedirectToAction("Index", "Home");
                 }
             }
             return View(model);
         }
 
-        [HttpPost]
+        [HttpPost("ResetPassword/{id}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ResetPassword(String UserName = null)
+        public async Task<IActionResult> ResetPassword(String id)
         {
             if (ModelState.IsValid)
             {
-                var user = await _userManager.FindByNameAsync(UserName);
-                if (user == null)
+                var result = await _accountService.ResetPassword(id);
+                if (!result.Succeeded)
                 {
-                    return NotFound("找不到該使用者");
-                }
-                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                var changePasswordResult = await _userManager.ResetPasswordAsync(user, token, "Az0.123");
-                if (!changePasswordResult.Succeeded)
-                {
-                    return BadRequest(changePasswordResult.Errors);
+                    return BadRequest(result.Errors);
                 }
             }
             return RedirectToAction("Members");
         }
 
-        [HttpGet]
+        [HttpGet("MemberRoles")]
         public async Task<IActionResult> MemberRoles(string Role)
         {
-            IEnumerable<MemberRolesViewModel> memberRolesViewModels;
-            if (string.IsNullOrEmpty(Role))
-            {
-                Role = _roleManager.Roles.Select(r => r.Name).First();
-            }
-
-            memberRolesViewModels = (await _userManager.GetUsersInRoleAsync(Role))
-                .Select(a => new MemberRolesViewModel() { UserName = a.UserName, Name = a.Name });
-
-            ViewData["CurrentRole"] = Role;
-
-            return View(memberRolesViewModels);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> AddRoleByUserName(String Role, String UserName)
-        {
-            if (UserName == null)
-            {
-                return NotFound("使用者輸入為空");
-            }
-            var user = await _userManager.FindByNameAsync(UserName);
-
-            if (user == null)
-            {
-                return NotFound("找不到該使用者");
-            }
-            else
-            {
-                await _userManager.AddToRoleAsync(user, Role);
-            }
-
-            ViewData["CurrentRole"] = Role;
-
-            var usersInRole = await _userManager.GetUsersInRoleAsync(Role);
-            return RedirectToAction("MemberRoles", new { Role });
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> DeleteRoleByUserName(String Role, String UserName)
-        {
-            var user = await _userManager.FindByNameAsync(UserName);
-            await _userManager.RemoveFromRoleAsync(user, Role);
-
-            return RedirectToAction("MemberRoles", new { Role });
-        }
-
-        [HttpGet]
-        public IActionResult RegisterTerms()
-        {
-            List<EditRegisterTermDto> model = _accountService.GetRegisterTermsList();
+            MemberRolesViewModel model = await _accountService.GetMemberRolesViewModel(Role);
             return View(model);
         }
 
-        [HttpPost]
+        [HttpPost("AddRoleByUserName")]
+        public async Task<IActionResult> AddRoleByUserName(ChangeRoleDto changeRoleDto)
+        {
+            changeRoleDto.Add = true;
+            var result =await _accountService.ChangeRole(changeRoleDto);
+            return RedirectToAction("MemberRoles", new { changeRoleDto.Role });
+        }
+
+        [HttpPost("DeleteRoleByUserName")]
+        public async Task<IActionResult> DeleteRoleByUserName(ChangeRoleDto changeRoleDto)
+        {
+            changeRoleDto.Add = false;
+            var result = await _accountService.ChangeRole(changeRoleDto);
+            return RedirectToAction("MemberRoles", new { changeRoleDto.Role });
+        }
+
+        [HttpGet("RegisterTerms")]
+        public async Task<IActionResult> RegisterTerms()
+        {
+            List<EditRegisterTermDto> model = await _accountService.GetRegisterTermsList();
+            return View(model);
+        }
+
+        [HttpPost("AddRegisterTerm")]
         public IActionResult AddRegisterTerm()
         {
             _accountService.AddRegisterTerm();
             return RedirectToAction("RegisterTerms");
         }
 
-        [HttpGet]
-        public IActionResult EditRegisterTerm(int RegisterTermId)
+        [HttpGet("EditRegisterTerm")]
+        public async Task<IActionResult> EditRegisterTerm(Guid RegisterTermId)
         {
-            EditRegisterTermDto registerTerm = _accountService.GetRegisterTermById(RegisterTermId);
+            EditRegisterTermDto registerTerm = await _accountService.GetRegisterTermById(RegisterTermId);
             return View("EditRegisterTerm", registerTerm);
         }
 
-        [HttpPost]
-        public IActionResult EditRegisterTerm(EditRegisterTermDto editRegisterTermDto)
+        [HttpPost("EditRegisterTerm")]
+        public async Task<IActionResult> EditRegisterTerm(EditRegisterTermDto editRegisterTermDto)
         {
-            _accountService.UpdateRegisterTerm(editRegisterTermDto);
+            await _accountService.UpdateRegisterTerm(editRegisterTermDto);
             return RedirectToAction("RegisterTerms");
         }
 
-        [HttpPost]
-        public IActionResult SwitchRegisterTermEnabled(int RegisterTermId)
+        [HttpPost("SwitchRegisterTermEnabled")]
+        public async Task<IActionResult> SwitchRegisterTermEnabled(Guid RegisterTermId)
         {
-            _accountService.SwitchRegisterTermEnabled(RegisterTermId);
+            await _accountService.SwitchRegisterTermEnabled(RegisterTermId);
             return RedirectToAction("RegisterTerms");
         }
 
-        [HttpGet]
-        public IActionResult Activities()
+        
+        [HttpGet("Activities")]
+        public async Task<IActionResult> Activities()
         {
-            List<ActivityInfoDto> model = _activityService.GetActivityInfos();
+            List<ActivityInfoDto> model = await _activityService.GetActivityInfos();
             return View(model);
         }
-
-        [HttpGet]
+        
+        [HttpGet("AddActivity")]
         public IActionResult AddActivity()
         {
             ActivitiyViewModel activities = new ActivitiyViewModel
             {
                 ActivityDataDto = new ActivityDataDto()
                 {
-                    Id = -1,
+                    Id = Guid.NewGuid(),
                     RegistrationStartDateTime = DateTime.Now,
                     RegistrationEndDateTime = DateTime.Now,
                     StartDateTime = DateTime.Now,
                     EndDateTime = DateTime.Now,
                     CreatedDateTime = DateTime.Now,
-                    CreatedUserName = User.Identity.Name
+                    CreatedUserId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier),
                 }
             };
             return View("EditActivity", activities);
         }
-
-        [HttpGet]
-        public IActionResult EditActivityById(int ActivityId)
+        
+        [HttpGet("EditActivityById")]
+        public async Task<IActionResult> EditActivityById(Guid ActivityId)
         {
-            ActivitiyViewModel activities = _activityService.GetActivitiesByActivityId(ActivityId);
+            ActivitiyViewModel activities = await _activityService.GetActivitiesByActivityId(ActivityId);
             return View("EditActivity", activities);
         }
 
-        [HttpPost]
-        public IActionResult SwitchActivityEnabledById(int ActivityId)
+        [HttpPost("SwitchActivityEnabledById")]
+        public async Task<IActionResult> SwitchActivityEnabledById(Guid ActivityId)
         {
-            _activityService.SwitchActivityEnabledById(ActivityId);
+            await _activityService.SwitchActivityEnabledById(ActivityId);
             return RedirectToAction("Activities");
         }
 
-        [HttpPost]
+        [HttpPost("ActivityDataDto")]
         [ValidateAntiForgeryToken]
-        public IActionResult EditActivityData(ActivityDataDto activityData)
+        public async Task<IActionResult> EditActivityData(ActivityDataDto activityData)
         {
-            if (_activityService.GetActivityDataByActivityId(activityData.Id) != null)
+            if (await _activityService.GetActivityDataByActivityId(activityData.Id) != null)
             {
                 activityData.UpdatedDateTime = DateTime.Now;
-                activityData.UpdatedUserName = _userManager.GetUserName(User);
-                _activityService.UpdateActivityData(activityData);
+                activityData.UpdatedUserId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                activityData.Id = await _activityService.UpdateActivityData(activityData);
                 return RedirectToAction("EditActivityById", new { ActivityId = activityData.Id });
             }
             else if (activityData.Name != null)
             {
                 activityData.CreatedDateTime = DateTime.Now;
-                activityData.CreatedUserName = _userManager.GetUserName(User);
-                activityData.Id = _activityService.UpdateActivityData(activityData);
+                activityData.CreatedUserId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                activityData.Id = await _activityService.UpdateActivityData(activityData);
                 return RedirectToAction("EditActivityById", new { ActivityId = activityData.Id });
             }
             else
@@ -285,83 +193,80 @@ namespace MVCPractice.Controllers
             }
         }
 
-
-        [HttpPost]
+        [HttpPost("UploadActivityImages")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UploadActivityImages(int ActivityId, List<IFormFile> images)
+        public async Task<IActionResult> UploadActivityImages(Guid ActivityId, List<IFormFile> images)
         {
             if (images == null || images.Count == 0)
             {
                 return BadRequest("No files received.");
             }
-            await UploadActivityImages(ActivityId, images);
+            await _activityService.UploadActivityImages(ActivityId, images);
             return Ok();
         }
 
-        [HttpPost]
-        public IActionResult EditActivityImage(ActivityImageDto ActivityImage)
+        [HttpPost("EditActivityImage")]
+        public async Task<IActionResult> EditActivityImage(ActivityImageDto ActivityImage)
         {
             if (ModelState.IsValid)
             {
-                _activityService.UpdateActivityImage(ActivityImage);
+                await _activityService.UpdateActivityImage(ActivityImage);
             }
 
-            return RedirectToAction("EditActivityById", new { ActivityId = ActivityImage.ActivityId });
+            return RedirectToAction("EditActivityById", new {ActivityImage.ActivityId });
         }
 
-        [HttpPost]
-        public IActionResult DeleteActivityImageById(int ActivityId, int ActivityImageId)
+        [HttpPost("DeleteActivityImageById")]
+        public async Task<IActionResult> DeleteActivityImageById(Guid ActivityId, Guid ActivityImageId)
         {
             if (ModelState.IsValid)
             {
-                _activityService.DeleteActivityImageById(ActivityImageId);
+                await _activityService.DeleteActivityImageById(ActivityImageId);
             }
 
-            return RedirectToAction("EditActivityById", new { ActivityId = ActivityId });
+            return RedirectToAction("EditActivityById", new {ActivityId });
         }
 
-        [HttpPost]
-        public IActionResult SwitchActivityImageIsCoverById(int ActivityId, int ActivityImageId)
+        [HttpPost("SwitchActivityImageIsCoverById")]
+        public async Task<IActionResult> SwitchActivityImageIsCoverById(Guid ActivityId, Guid ActivityImageId)
         {
-            _activityService.SwitchActivityImageIsCoverById(ActivityImageId);
+            await _activityService.SwitchActivityImageIsCoverById(ActivityImageId);
 
-            return RedirectToAction("EditActivityById", new { ActivityId = ActivityId });
+            return RedirectToAction("EditActivityById", new {ActivityId });
         }
 
-
-        [HttpPost]
+        [HttpPost("UploadActivityFiles")]
         [ValidateAntiForgeryToken]
-        public IActionResult UploadActivityFiles(int ActivityId, List<IFormFile> files)
+        public async Task<IActionResult> UploadActivityFiles(Guid ActivityId, List<IFormFile> files)
         {
-
             if (files == null || files.Count == 0)
             {
                 return BadRequest("No files received.");
             }
-            _activityService.UploadActivityFiles(ActivityId, files);
-            return RedirectToAction("EditActivityById", new { ActivityId = ActivityId });
+            await _activityService.UploadActivityFiles(ActivityId, files);
+            return RedirectToAction("EditActivityById", new {ActivityId });
         }
 
-        [HttpPost]
-        public IActionResult EditActivityFile(ActivityFileDto ActivityFile)
+        [HttpPost("EditActivityFile")]
+        public async Task<IActionResult> EditActivityFile(ActivityFileDto ActivityFile)
         {
             if (ModelState.IsValid)
             {
-                _activityService.UpdateActivityFile(ActivityFile);
+                await _activityService.UpdateActivityFile(ActivityFile);
             }
 
-            return RedirectToAction("EditActivityById", new { ActivityId = ActivityFile.ActivityId });
+            return RedirectToAction("EditActivityById", new {ActivityFile.ActivityId });
         }
 
-        [HttpPost]
-        public IActionResult DeleteActivityFileById(int ActivityId, int ActivityFileId)
+        [HttpPost("DeleteActivityFileById")]
+        public async Task<IActionResult> DeleteActivityFileById(Guid ActivityId, Guid ActivityFileId)
         {
             if (ModelState.IsValid)
             {
-                _activityService.DeleteActivityFileById(ActivityFileId);
+                await _activityService.DeleteActivityFileById(ActivityFileId);
             }
 
-            return RedirectToAction("EditActivityById", new { ActivityId = ActivityId });
+            return RedirectToAction("EditActivityById", new {ActivityId });
         }
     }
 }

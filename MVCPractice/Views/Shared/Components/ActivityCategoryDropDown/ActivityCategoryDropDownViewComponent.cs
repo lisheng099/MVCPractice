@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MVCPractice.Interfaces;
-using MVCPractice.servers;
 
 namespace MyMvcWebsite.Views.Shared.Components.ActivityCategoryViewComponent
 {

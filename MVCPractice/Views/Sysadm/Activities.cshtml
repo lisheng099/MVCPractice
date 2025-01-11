@@ -57,11 +57,11 @@
                         <td>
                             <div class="form-container">
                                 <form method="get" asp-controller="Sysadm" asp-action="EditActivityById">
-                                    <input type="hidden" name="ActivityId" value="@Activity.Id" />
+                                    <input type="hidden" name="ActivityId" value="@Activity.ActivityId" />
                                     <button type="submit" class="btn btn-secondary">編輯</button>
                                 </form>
                                 <form method="post" asp-controller="Sysadm" asp-action="SwitchActivityEnabledById">
-                                    <input type="hidden" name="ActivityId" value="@Activity.Id" />
+                                    <input type="hidden" name="ActivityId" value="@Activity.ActivityId" />
                                     <input type="hidden" name="ActivityEnabled" value="@Activity.Enabled" />
                                     @if (@Activity.Enabled)
                                     {

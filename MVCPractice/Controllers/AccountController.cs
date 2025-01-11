@@ -1,63 +1,36 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MVCPractice.Areas.Identity.Data;
+using MVCPractice.Attributes;
+using MVCPractice.Dtos.Account;
 using MVCPractice.Interfaces;
 using MVCPractice.ViewModels.Account;
 
 namespace MVCPractice.Controllers
 {
+    [Route("[controller]")]
+    [AllowAnonymous]
     public class AccountController(
-        ILogger<AccountController> logger,
-        UserManager<MVCPracticeUser> userManager,
-        RoleManager<IdentityRole> roleManager,
-        SignInManager<MVCPracticeUser> signInManager,
         IAccountService accountService) : Controller
     {
-        private readonly ILogger<AccountController> _logger = logger;
-        private readonly UserManager<MVCPracticeUser> _userManager = userManager;
-        private readonly RoleManager<IdentityRole> _roleManager = roleManager;
-        private readonly SignInManager<MVCPracticeUser> _signInManager = signInManager;
         private readonly IAccountService _accountService = accountService;
 
-
-        public IActionResult Index()
+        [HttpGet("Register")]
+        public async Task<IActionResult> Register()
         {
-            return RedirectToRoute(new { controller = "Home", action = "Index" });
-        }
-
-        [HttpGet]
-        public IActionResult Register()
-        {
-            RegisterViewModel registerViewModel = _accountService.GetRegisterViewModel();
+            RegisterViewModel registerViewModel = await _accountService.GetRegisterViewModel();
 
             return View(registerViewModel);
         }
 
-        [HttpPost]
+        [HttpPost("Register")]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            if (ModelState.IsValid) {
-                var user = new MVCPracticeUser
-                {
-                    UserName = model.Username,
-                    Email = model?.Email,
-                    Name = model.Name,
-                    Birthday = model?.Birthday,
-                    Gender = model?.Gender,
-                    IdNumber = model.IdNumber,
-                    Profession = model?.Profession,
-                    Education = model?.Education,
-                    Marriage = model?.Marriage,
-                    Religion = model?.Religion,
-                    PhoneNumber = model?.Phone,
-                    LandlinePhone = model?.LandlinePhone,
-                    Address = model?.Address
-                };
-
-                var result = await _userManager.CreateAsync(user, model.Password);
+            if (ModelState.IsValid)
+            {
+                var result = await _accountService.Register(model);
                 if (result.Succeeded)
                 {
-                    await _userManager.AddToRoleAsync(user, "User");
                     return RedirectToAction("Index", "Home");
                 }
                 else
@@ -68,32 +41,25 @@ namespace MVCPractice.Controllers
                     }
                 }
             }
-
             return View(model);
         }
 
-
-        [HttpGet]
+        [HttpGet("Login")]
         public IActionResult Login()
         {
             return View();
         }
 
-        [HttpPost]
+        [HttpPost("Login")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model)
+        public async Task<IActionResult> Login(LoginPostDto model)
         {
             if (ModelState.IsValid)
             {
-                var result = await _signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberMe, lockoutOnFailure: false);
-                if (result.Succeeded)
+                var principal = await _accountService.Login(model);
+                if (principal != null)
                 {
-                    var user = await _userManager.FindByNameAsync(model.Username);
-                    var roles = await _userManager.GetRolesAsync(user);
-                    HttpContext.Session.SetString("UserRoles", string.Join(",", roles));
-
-                    _logger.LogInformation("User logged in.");
-
+                    await HttpContext.SignInAsync(principal);
                     return RedirectToAction("Index", "Home");
                 }
                 else
@@ -105,118 +71,61 @@ namespace MVCPractice.Controllers
             return View(model);
         }
 
-        [HttpGet]
-        public IActionResult Logout()
+        [HttpGet("Logout")]
+        public async Task<IActionResult> Logout()
         {
-            _signInManager.SignOutAsync();
-            HttpContext.Session.Remove("UserRoles");
+            await _accountService.Logout();
             return RedirectToAction("Index", "Home");
         }
 
-        [HttpGet]
-        public async Task<IActionResult> EditProfile()
+        [HttpGet("EditProfile/{Id}")]
+        [ValidateUserId]
+        public async Task<IActionResult> EditProfile(String Id)
         {
-            MVCPracticeUser user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            HttpContext.Session.SetString("UserName", user.UserName);
-
-            EditProfileViewModel editProfileViewModel = 
-                new EditProfileViewModel()
-                {
-                    UserName = user.UserName,
-                    Name=user.Name,
-                    Birthday=user.Birthday,
-                    Gender=user.Gender,
-                    IdNumber=user.IdNumber,
-                    Profession=user.Profession,
-                    Education=user.Education,
-                    Marriage=user.Marriage,
-                    Religion=user.Religion,
-                    LandlinePhone=user.LandlinePhone,
-                    Address=user.Address,
-                    PhoneNumber=user.PhoneNumber,
-                    Email=user.Email,
-                };
+            EditProfileViewModel editProfileViewModel = await _accountService.GetEditProfileViewModel(Id);
+            if (editProfileViewModel == null) { return NotFound("找不到該會員或沒有權限修改。"); }
             return View(editProfileViewModel);
         }
-        [HttpPost]
-        public async Task<IActionResult> EditProfile(EditProfileViewModel model)
+
+        [HttpPost("EditProfile/{Id}")]
+        [ValidateUserId]
+        public async Task<IActionResult> EditProfile(String Id, EditProfileViewModel model)
         {
+            model.Id = Id;
             if (ModelState.IsValid)
             {
-                var user = await _userManager.GetUserAsync(User);
-                if (user != null || user.UserName != model.UserName)
+                var result = await _accountService.EditProfile(model);
+                if (result.Succeeded)
                 {
-                    user.Email = model.Email;
-                    user.Name = model.Name;
-                    user.Birthday = model.Birthday;
-                    user.Gender = model.Gender;
-                    user.IdNumber = model.IdNumber;
-                    user.Profession = model.Profession;
-                    user.Education = model.Education;
-                    user.Marriage = model.Marriage;
-                    user.Religion = model.Religion;
-                    user.PhoneNumber = model.PhoneNumber;
-                    user.LandlinePhone = model.LandlinePhone;
-                    user.Address = model.Address;
-
-                    var result = await _userManager.UpdateAsync(user);
-                    if (!result.Succeeded)
-                    {
-                        return View(model);
-                    }
-
                     return RedirectToAction("Index", "Home");
                 }
             }
             return View(model);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> EditPassword()
+        [HttpGet("EditPassword/{Id}")]
+        [ValidateUserId]
+        public async Task<IActionResult> EditPassword(String Id)
         {
-            MVCPracticeUser user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            EditPasswordViewModel editPasswordViewModel =
-                new EditPasswordViewModel()
-                {
-                    UserName = user.UserName
-                };
-            return View(editPasswordViewModel);
+            EditPasswordViewModel model = await _accountService.GetEditPasswordViewModel(Id);
+            return View(model);
         }
 
-        [HttpPost]
+        [HttpPost("EditPassword/{Id}")]
+        [ValidateUserId]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditPassword(EditPasswordViewModel model)
+        public async Task<IActionResult> EditPassword(String Id, EditPasswordViewModel model)
         {
+            model.Id = Id;
             if (ModelState.IsValid)
             {
-                MVCPracticeUser user = await _userManager.GetUserAsync(User);
-
-                if (user == null)
+                var result = await _accountService.EditPassword(model);
+                if (result.Succeeded)
                 {
-                    return NotFound("找不到該使用者");
-                }
-                var result = await _signInManager.PasswordSignInAsync(model.UserName, model.OldPassword, false, false);
-                if (!result.Succeeded)
-                {
-                    return BadRequest("與當前密碼不符");
-                }
-                var changePasswordResult = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.Password);
-                if (!changePasswordResult.Succeeded)
-                {
-                    return BadRequest(changePasswordResult.Errors);
+                    return RedirectToAction("Index", "Home");
                 }
             }
-            return RedirectToAction("Index", "Home");
+            return View(model);
         }
     }
 }

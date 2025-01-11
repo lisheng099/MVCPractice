@@ -1,16 +1,16 @@
 ﻿@using MVCPractice.ViewModels.Sysadm
-@model IEnumerable<MemberRolesViewModel>
+@model MemberRolesViewModel
 
 
 <h2>角色清單</h2>
 
 <form asp-action="MemberRoles" method="get" class="form-inline">
-    @await Component.InvokeAsync("RoleDropDown", new { role = ViewData["CurrentRole"] })
+    @await Component.InvokeAsync("RoleDropDown", new { role = Model.SearchTerm })
     <button type="submit" class="btn btn-primary">Search</button>
 </form>
 
 <form asp-action="AddRoleByUserName" method="post" class="form-inline">
-    <input type="hidden" name="Role" value="@ViewData["CurrentRole"]" />
+    <input type="hidden" name="Role" value="@Model.SearchTerm" />
     <div class="form-group">
         <label for="searchTerm">會員帳號:</label>
         <input type="text" id="UserName" name="UserName" class="form-control" />
@@ -18,7 +18,7 @@
     <button type="submit" class="btn btn-primary">新增</button>
 </form>
 
-@if (Model != null && Model.Any())
+@if (Model != null)
 {
     <table class="table">
         <thead>
@@ -29,14 +29,14 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var user in Model)
+            @foreach (var user in Model.Users)
             {
                 <tr>
                     <td>@user.UserName</td>
                     <td>@user.Name</td>
                     <td>
                         <form method="post" asp-controller="Sysadm" asp-action="DeleteRoleByUserName">
-                            <input type="hidden" name="Role" value="@ViewData["CurrentRole"]" />
+                            <input type="hidden" name="Role" value="@Model.SearchTerm" />
                             <input type="hidden" name="UserName" value="@user.UserName" />
                             <button type="submit" class="btn btn-secondary">刪除</button>
                         </form>

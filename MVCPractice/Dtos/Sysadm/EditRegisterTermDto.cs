@@ -2,7 +2,7 @@
 {
     public class EditRegisterTermDto
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public int OrderIndex { get; set; }
         public string Content { get; set; } = "";
         public bool Enabled { get; set; }

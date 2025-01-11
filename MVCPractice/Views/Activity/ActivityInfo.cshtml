@@ -1,10 +1,11 @@
-﻿@using MVCPractice.Areas.Identity.Data
+﻿
 @using MVCPractice.Dtos.Activities
+@using MVCPractice.Models.Account
 @using Microsoft.AspNetCore.Identity
 @model ActivityInfoDto
-@inject UserManager<MVCPracticeUser> UserManager
+@inject UserManager<ApplicationUser> UserManager
 
-<p class="form-control-static">活動編號:@Model.Id</p>
+<p class="form-control-static">活動編號:@Model.ActivityId</p>
 <p class="form-control-static">活動名稱:@Model.Name</p>
 <p class="form-control-static">類別:@Model.CategoryName</p>
 <p class="form-control-static">已報名人數:@Model.ParticipatedPersonsNumber</p>
@@ -42,7 +43,7 @@
     @if (Model.Participated)
     {
         <form method="post" asp-controller="Activity" asp-action="CancelParticipatedActivityById">
-            <input type="hidden" name="ActivityId" value="@Model.Id" />
+            <input type="hidden" name="ActivityId" value="@Model.ActivityId" />
             <input type="hidden" name="UserName" value="@UserManager.GetUserName(User)" />
             <input type="hidden" name="PersonsNumber" value="@Model.PersonsNumber" />
             <button type="submit" class="btn btn-secondary">取消報名</button>
@@ -51,9 +52,9 @@
     else
     {
         <form method="post" asp-controller="Activity" asp-action="ParticipatedActivityById">
-            <input type="hidden" name="ActivityId" value="@Model.Id" />
+            <input type="hidden" name="ActivityId" value="@Model.ActivityId" />
             <input type="hidden" name="UserName" value="@UserManager.GetUserName(User)" />
-            <input type="hidden" name="PersonsNumber" value="@Model.PersonsNumber" />
+            <input type="hidden" name="PersonsNumber" value="1" />
             <button type="submit" class="btn btn-secondary">報名</button>
         </form>
     }

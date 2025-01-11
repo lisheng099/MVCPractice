@@ -2,10 +2,10 @@
 {
     public class ActivityInfoDto
     {
-        public int Id { get; set; }
+        public Guid ActivityId { get; set; }
         public string Name { get; set; } = null!;
         public int OrderIndex { get; set; }
-        public int CategoryId { get; set; }
+        public Guid CategoryId { get; set; }
         public string CategoryName { get; set; }
         public int ParticipatedPersonsNumber { get; set; }
         public int PersonsNumber { get; set; }
@@ -18,9 +18,9 @@
 
         public bool Participated { get; set; }
 
-        public string CoverImageUrl { get; set; }
+        public string CoverImageUrl { get; set; } = null!;
 
-        public List<ActivityImageDto> ActivityImages { get; set; }
-        public List<ActivityFileDto> ActivityFiles { get; set; }
+        public List<ActivityImageDto> ActivityImages { get; set; } = null!;
+        public List<ActivityFileDto> ActivityFiles { get; set; } = null!;
     }
 }

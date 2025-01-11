@@ -82,7 +82,6 @@ const editorConfig = {
             }
         ]
     },
-
 };
 
 ClassicEditor

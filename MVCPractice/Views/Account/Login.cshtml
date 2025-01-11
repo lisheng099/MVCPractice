@@ -1,5 +1,6 @@
-﻿@using MVCPractice.ViewModels.Account
-@model LoginViewModel
+﻿@using MVCPractice.Dtos.Account
+
+@model LoginPostDto
 
 <h2>登入</h2>
 
@@ -16,13 +17,6 @@
         <label asp-for="Password" class="control-label"></label>
         <input asp-for="Password" class="form-control" />
         <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
-
-    <div class="form-group" hidden>
-        <div class="checkbox">
-            <label asp-for="RememberMe"></label>
-            <input asp-for="RememberMe" />
-        </div>
     </div>
 
     <button type="submit" class="btn btn-primary">登入</button>

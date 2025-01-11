@@ -1,17 +1,17 @@
 ﻿@using MVCPractice.ViewModels.Sysadm
-@model IEnumerable<MembersViewModel>
+@model MembersViewModel
 
 <h2>會員清單</h2>
 
 <form asp-action="Members" method="get" class="form-inline">
     <div class="form-group">
         <label for="searchTerm">Search:</label>
-        <input type="text" id="searchTerm" name="searchTerm" class="form-control" value="@ViewData["searchTerm"]" />
+        <input type="text" id="searchTerm" name="searchTerm" class="form-control" value="@Model.SearchTerm" />
     </div>
     <button type="submit" class="btn btn-primary">Search</button>
 </form>
 
-@if (Model != null && Model.Any())
+@if (Model != null )
 {
     <table class="table">
         <thead>
@@ -22,19 +22,17 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var user in Model)
+            @foreach (var user in Model.Users)
             {
                 <tr>
                     <td>@user.UserName</td>
                     <td>@user.Name</td>
                     <td>
-                        <form method="get" asp-controller="Sysadm" asp-action="EditProfile">
-                            <input type="hidden" name="UserName" value="@user.UserName" />
-                            <button type="submit" class="btn btn-secondary">Edit</button>
+                        <form method="get" asp-controller="Sysadm" asp-action="EditProfile" asp-route-id="@user.Id">
+                            <button type="submit" class="btn btn-secondary">編輯資料</button>
                         </form>
-                        <form method="post" asp-controller="Sysadm" asp-action="ResetPassword">
-                            <input type="hidden" name="UserName" value="@user.UserName" />
-                            <button type="submit" class="btn btn-danger">Reset Password</button>
+                        <form method="post" asp-controller="Sysadm" asp-action="ResetPassword" asp-route-id="@user.Id">
+                            <button type="submit" class="btn btn-danger">重置密碼</button>
                         </form>
                     </td>
                 </tr>

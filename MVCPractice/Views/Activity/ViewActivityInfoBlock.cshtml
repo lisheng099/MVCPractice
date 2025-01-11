@@ -2,7 +2,7 @@
 @model ActivityInfoDto
 
 <img src="@Model.CoverImageUrl" alt="CoverImageUrl" class="activity-image-img" width="200">
-<p class="form-control-static">活動編號:@Model.Id</p>
+<p class="form-control-static">活動編號:@Model.ActivityId</p>
 <p class="form-control-static">活動名稱:@Model.Name</p>
 <p class="form-control-static">類別:@Model.CategoryName</p>
 <p class="form-control-static">已報名人數:@Model.ParticipatedPersonsNumber</p>
@@ -11,7 +11,7 @@
 <p class="form-control-static">活動開始時間:@Model.StartDateTime</p>
 <p class="form-control-static">活動結束時間:@Model.EndDateTime</p>
 
-<form method="get" asp-controller="Activity" asp-action="GetActivityInfoById" asp-route-id="@Model.Id">
+<form method="get" asp-controller="Activity" asp-action="GetActivityInfoById" asp-route-id="@Model.ActivityId">
     <button type="submit" class="btn btn-secondary">查看</button>
 </form>
 

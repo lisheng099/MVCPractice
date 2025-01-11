@@ -1,32 +1,32 @@
 ﻿using MVCPractice.Dtos.Activities;
-using MVCPractice.Models.Activities;
+using MVCPractice.Parameters.Activity;
 using MVCPractice.ViewModels.Activities;
 
 namespace MVCPractice.Interfaces
 {
     public interface IActivityService
     {
-        Task<List<ActivityCategoryDto>> GetActivityCategories();
-        List<ActivityInfoDto> GetActivityInfos();
-        List<ActivityInfoDto> GetActivityInfos(DateTime dateTime);
-        List<ActivityInfoDto> GetParticipatedActivityInfos(string UserName);
-        ActivityInfoDto GetActivityInfoById(int ActivityId);
-        bool CheckParticipatedActivityInfoById (int ActivityId, string UserName);
-        bool ParticipatedActivityById(int ActivityId, string UserName, int PersonsNumber, string CreatedUserName);
-        bool CancelParticipatedActivityById(int ActivityId, string UserName, int PersonsNumber, string CreatedUserName);
-        ActivitiyViewModel GetActivitiesByActivityId(int ActivityId);
-        ActivityDataDto GetActivityDataByActivityId(int ActivityId);
-        void SwitchActivityEnabledById(int ActivityId);
+        public Task<List<ActivityCategoryDto>> GetActivityCategories();
 
-        int UpdateActivityData(ActivityDataDto Activity);
+        public Task<List<ActivityInfoDto>> GetActivityInfos(GetActivityParameter value = null);
+        public Task<bool> CheckParticipatedActivityInfoById (CheckParticipatedActivityParameter value);
+        public Task<bool> ParticipatedActivityById(ParticipatedActivityDto value);
+        public Task<bool> CancelParticipatedActivityById(CancelParticipatedActivityDto value);
 
-        void UpdateActivityImage(ActivityImageDto activityImage);
-        void DeleteActivityImageById(int ActivityImageId);
-        void SwitchActivityImageIsCoverById(int ActivityImageId);
-        void UpdateActivityFile(ActivityFileDto activityFile);
-        void DeleteActivityFileById(int ActivityFileId);
 
-        void UploadActivityImages(int ActivityId, List<IFormFile> images);
-        void UploadActivityFiles(int ActivityId, List<IFormFile> files);
+        public Task<ActivitiyViewModel> GetActivitiesByActivityId(Guid ActivityId);
+        public Task<ActivityDataDto> GetActivityDataByActivityId(Guid ActivityId);
+        public Task SwitchActivityEnabledById(Guid ActivityId);
+
+        public Task<Guid> UpdateActivityData(ActivityDataDto Activity);
+
+        public Task UpdateActivityImage(ActivityImageDto activityImage);
+        public Task DeleteActivityImageById(Guid ActivityImageId);
+        public Task SwitchActivityImageIsCoverById(Guid ActivityImageId);
+        public Task UpdateActivityFile(ActivityFileDto activityFile);
+        public Task DeleteActivityFileById(Guid ActivityFileId);
+
+        public Task UploadActivityImages(Guid ActivityId, List<IFormFile> images);
+        public Task UploadActivityFiles(Guid ActivityId, List<IFormFile> files);
     }
 }

@@ -1,8 +1,10 @@
-﻿namespace MVCPractice.ViewModels.Sysadm
+﻿using MVCPractice.Dtos.Account;
+
+namespace MVCPractice.ViewModels.Sysadm
 {
     public class MemberRolesViewModel
     {
-        public string UserName { get; set; }
-        public string Name { get; set; }
+        public string SearchTerm { get; set; } = null;
+        public IEnumerable<UserDto> Users { get; set; }
     }
 }

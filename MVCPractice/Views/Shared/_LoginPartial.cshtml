@@ -1,14 +1,14 @@
-﻿@using Microsoft.AspNetCore.Identity
-@using MVCPractice.Areas.Identity.Data
+﻿@using MVCPractice.Models.Account
+@using Microsoft.AspNetCore.Identity
 
-@inject SignInManager<MVCPracticeUser> SignInManager
-@inject UserManager<MVCPracticeUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
 
 <ul class="navbar-nav">
     @if (SignInManager.IsSignedIn(User))
     {
         <li class="nav-item">
-            <a id="manage" class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @UserManager.GetUserName(User)!</a>
+            <a id="manage" class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @UserManager.GetUserName(User) !</a>
         </li>
         <li class="nav-item">
             <a asp-area="" asp-controller="Account" asp-action="Logout">登出</a>

@@ -2,8 +2,8 @@
 {
     public class ActivityImageDto
     {
-        public int Id { get; set; }
-        public int ActivityId { get; set; }
+        public Guid Id { get; set; }
+        public Guid ActivityId { get; set; }
         public string Name { get; set; }
         public bool IsCover { get; set; }
         public int OrderIndex { get; set; }

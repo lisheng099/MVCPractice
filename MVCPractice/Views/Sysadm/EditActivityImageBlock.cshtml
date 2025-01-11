@@ -10,7 +10,7 @@
     </div>
     <div class="form-group">
         <label asp-for="ActivityId" class="control-label"></label>
-        <input asp-for="ActivityId" class="form-control" />
+        <input asp-for="ActivityId" class="form-control" readonly />
         <span asp-validation-for="ActivityId" class="text-danger"></span>
     </div>
     <div class="form-group">
@@ -18,9 +18,9 @@
         <input asp-for="Name" class="form-control" />
         <span asp-validation-for="Name" class="text-danger"></span>
     </div>
-    <div class="form-group" readonly>
+    <div class="form-group" hidden>
         <input asp-for="IsCover" type="checkbox" class="form-check-label" readonly />
-        <label asp-for="IsCover" class="form-check-label" >首頁</label>
+        <label asp-for="IsCover" class="form-check-label" readonly>首頁</label>
         <span asp-validation-for="IsCover" class="text-danger"></span>
     </div>
     <div class="form-group">

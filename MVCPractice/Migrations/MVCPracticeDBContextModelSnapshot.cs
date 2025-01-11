@@ -57,7 +57,6 @@ namespace MVCPractice.Migrations
                         .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("IdNumber")
-                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
@@ -76,7 +75,6 @@ namespace MVCPractice.Migrations
                         .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
@@ -130,14 +128,11 @@ namespace MVCPractice.Migrations
 
             modelBuilder.Entity("MVCPractice.Models.Account.RegisterTerm", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Content")
-                        .IsRequired()
                         .HasColumnType("nvarchar(MAX)");
 
                     b.Property<DateTime>("CreatedDateTime")
@@ -154,173 +149,213 @@ namespace MVCPractice.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RegisterTermsList", (string)null);
+                    b.ToTable("RegisterTerms");
                 });
 
             modelBuilder.Entity("MVCPractice.Models.Activities.ActivityCategory", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("(newid())");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("OrderIndex")
-                        .HasColumnType("int");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
 
                     b.HasKey("Id");
 
-                    b.ToTable("ActivityCategory", (string)null);
+                    b.ToTable("ActivityCategorys");
                 });
 
             modelBuilder.Entity("MVCPractice.Models.Activities.ActivityData", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("(newid())");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("CategoryId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Content")
-                        .HasColumnType("nvarchar(MAX)");
-
-                    b.Property<DateTime?>("CreatedDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedUserName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDateTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<string>("CreatedUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("Enabled")
-                        .HasColumnType("bit");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
-                    b.Property<DateTime?>("EndDateTime")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTime>("EndDateTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasDefaultValueSql("(getdate())");
 
                     b.Property<string>("Introduce")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("OrderIndex")
+                    b.Property<int>("OrderIndex")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("PersonsNumber")
                         .HasColumnType("int");
 
-                    b.Property<int?>("PersonsNumber")
-                        .HasColumnType("int");
+                    b.Property<DateTime>("RegistrationEndDateTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasDefaultValueSql("(getdate())");
 
-                    b.Property<DateTime?>("RegistrationEndDateTime")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTime>("RegistrationStartDateTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasDefaultValueSql("(getdate())");
 
-                    b.Property<DateTime?>("RegistrationStartDateTime")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTime>("StartDateTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasDefaultValueSql("(getdate())");
 
-                    b.Property<DateTime?>("StartDateTime")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTime>("UpdatedDateTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasDefaultValueSql("(getdate())");
 
-                    b.Property<DateTime?>("UpdatedDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UpdatedUserName")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("UpdatedUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("ActivityDatas", (string)null);
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("CreatedUserId");
+
+                    b.HasIndex("UpdatedUserId");
+
+                    b.ToTable("ActivityDatas");
                 });
 
             modelBuilder.Entity("MVCPractice.Models.Activities.ActivityFile", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("(newid())");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ActivityId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("ActivityId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("OrderIndex")
-                        .HasColumnType("int");
+                    b.Property<int>("OrderIndex")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
 
                     b.Property<string>("Url")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("ActivityFiles", (string)null);
+                    b.HasIndex("ActivityId");
+
+                    b.ToTable("ActivityFiles");
                 });
 
             modelBuilder.Entity("MVCPractice.Models.Activities.ActivityImage", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("(newid())");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ActivityId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("ActivityId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsCover")
-                        .HasColumnType("bit");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("OrderIndex")
-                        .HasColumnType("int");
+                    b.Property<int>("OrderIndex")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
 
                     b.Property<string>("Url")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ActivityImages", (string)null);
-                });
-
-            modelBuilder.Entity("MVCPractice.Models.Activities.ParticipatedActivityRecord", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ActivityId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("CreatedDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedUserName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool?>("IsCancel")
-                        .HasColumnType("bit");
-
-                    b.Property<int?>("PersonsNumber")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("ParticipatedActivityRecord", (string)null);
+                    b.HasIndex("ActivityId");
+
+                    b.ToTable("ActivityImages");
+                });
+
+            modelBuilder.Entity("MVCPractice.Models.Activities.ParticipatedActivityRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("(newid())");
+
+                    b.Property<Guid>("ActivityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDateTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<string>("CreatedUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("IsCancel")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<int>("PersonsNumber")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActivityId");
+
+                    b.HasIndex("CreatedUserId");
+
+                    b.ToTable("ParticipatedActivityRecords");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -456,6 +491,67 @@ namespace MVCPractice.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("MVCPractice.Models.Activities.ActivityData", b =>
+                {
+                    b.HasOne("MVCPractice.Models.Activities.ActivityCategory", "ActivityCategory")
+                        .WithMany("ActivityDatas")
+                        .HasForeignKey("CategoryId")
+                        .IsRequired();
+
+                    b.HasOne("MVCPractice.Models.Account.ApplicationUser", "CreatedUser")
+                        .WithMany("UserCreatedActivityDatas")
+                        .HasForeignKey("CreatedUserId")
+                        .IsRequired();
+
+                    b.HasOne("MVCPractice.Models.Account.ApplicationUser", "UpdateUser")
+                        .WithMany("UserUpdateActivityDatas")
+                        .HasForeignKey("UpdatedUserId")
+                        .IsRequired();
+
+                    b.Navigation("ActivityCategory");
+
+                    b.Navigation("CreatedUser");
+
+                    b.Navigation("UpdateUser");
+                });
+
+            modelBuilder.Entity("MVCPractice.Models.Activities.ActivityFile", b =>
+                {
+                    b.HasOne("MVCPractice.Models.Activities.ActivityData", "ActivityData")
+                        .WithMany("ActivityFiles")
+                        .HasForeignKey("ActivityId")
+                        .IsRequired();
+
+                    b.Navigation("ActivityData");
+                });
+
+            modelBuilder.Entity("MVCPractice.Models.Activities.ActivityImage", b =>
+                {
+                    b.HasOne("MVCPractice.Models.Activities.ActivityData", "ActivityData")
+                        .WithMany("ActivityImages")
+                        .HasForeignKey("ActivityId")
+                        .IsRequired();
+
+                    b.Navigation("ActivityData");
+                });
+
+            modelBuilder.Entity("MVCPractice.Models.Activities.ParticipatedActivityRecord", b =>
+                {
+                    b.HasOne("MVCPractice.Models.Activities.ActivityData", "ActivityData")
+                        .WithMany("ParticipatedActivityRecords")
+                        .HasForeignKey("ActivityId")
+                        .IsRequired();
+
+                    b.HasOne("MVCPractice.Models.Account.ApplicationUser", "CreatedUser")
+                        .WithMany("UserCreatedParticipatedActivityRecords")
+                        .HasForeignKey("CreatedUserId")
+                        .IsRequired();
+
+                    b.Navigation("ActivityData");
+
+                    b.Navigation("CreatedUser");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -505,6 +601,29 @@ namespace MVCPractice.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("MVCPractice.Models.Account.ApplicationUser", b =>
+                {
+                    b.Navigation("UserCreatedActivityDatas");
+
+                    b.Navigation("UserCreatedParticipatedActivityRecords");
+
+                    b.Navigation("UserUpdateActivityDatas");
+                });
+
+            modelBuilder.Entity("MVCPractice.Models.Activities.ActivityCategory", b =>
+                {
+                    b.Navigation("ActivityDatas");
+                });
+
+            modelBuilder.Entity("MVCPractice.Models.Activities.ActivityData", b =>
+                {
+                    b.Navigation("ActivityFiles");
+
+                    b.Navigation("ActivityImages");
+
+                    b.Navigation("ParticipatedActivityRecords");
                 });
 #pragma warning restore 612, 618
         }

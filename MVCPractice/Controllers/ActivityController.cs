@@ -1,74 +1,92 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using MVCPractice.Areas.Identity.Data;
 using MVCPractice.Dtos.Activities;
 using MVCPractice.Interfaces;
+using MVCPractice.Parameters.Activity;
+using System.Security.Claims;
 
 namespace MVCPractice.Controllers
 {
+    [Route("[controller]")]
     public class ActivityController(
-        ILogger<AccountController> logger,
-        UserManager<MVCPracticeUser> userManager,
-        RoleManager<IdentityRole> roleManager,
-        SignInManager<MVCPracticeUser> signInManager,
         IActivityService activityService) : Controller
     {
-        private readonly ILogger<AccountController> _logger = logger;
-        private readonly UserManager<MVCPracticeUser> _userManager = userManager;
-        private readonly RoleManager<IdentityRole> _roleManager = roleManager;
-        private readonly SignInManager<MVCPracticeUser> _signInManager = signInManager;
         private readonly IActivityService _activityService = activityService;
 
-        public IActionResult Index()
+        [HttpGet("ActivityInfos")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ActivityInfos()
         {
-            return RedirectToRoute(new { controller = "Home", action = "Index" });
+            List<ActivityInfoDto> activityInfos =
+                await _activityService.GetActivityInfos(
+                new GetActivityParameter()
+                {
+                    StartDateTime = DateTime.Now,
+                    EndDateTime = DateTime.MaxValue,
+                });
+            return View(activityInfos);
         }
 
-        [HttpGet]
-        [Route("Activity/ActivityInfos/{id}")]
-        public IActionResult GetActivityInfoById(int id)
+        [HttpGet("ActivityInfos/{id}")]
+        public async Task<IActionResult> GetActivityInfoById(Guid id)
         {
-            ActivityInfoDto activitieyInfo = _activityService.GetActivityInfoById(id);
-            if(_activityService.CheckParticipatedActivityInfoById(id, _userManager.GetUserName(User)))
+            ActivityInfoDto activitieyInfo =
+                (await _activityService.GetActivityInfos(
+                new GetActivityParameter()
+                { 
+                    ActivityId= id
+                })).FirstOrDefault();
+            if (await _activityService.CheckParticipatedActivityInfoById(
+                new CheckParticipatedActivityParameter()
+                {
+                    ActivityId = id,
+                    UserId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier),
+                }))
             {
                 activitieyInfo.Participated = true;
             }
             return View("ActivityInfo", activitieyInfo);
         }
 
-        [HttpGet]
-        public IActionResult ActivityInfos()
-        {
-            List<ActivityInfoDto> activityInfos = _activityService.GetActivityInfos(DateTime.Now);
-            return View(activityInfos);
-        }
-
-        [HttpGet]
+        [HttpGet("ParticipatedActivityInfos")]
         [Authorize(Roles = "User")]
-        public IActionResult ParticipatedActivityInfos()
+        public async Task<IActionResult> ParticipatedActivityInfos()
         {
-            List<ActivityInfoDto> activityInfos = _activityService.GetParticipatedActivityInfos(_userManager.GetUserName(User));
+            List<ActivityInfoDto> activityInfos =
+                await _activityService.GetActivityInfos(
+                new GetActivityParameter()
+                {
+                    UserId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier),
+                    CheckIsParticipated = true
+                });
             return View("ActivityInfos", activityInfos);
         }
 
-
-        [HttpPost]
+        [HttpPost("ParticipatedActivityById")]
         [Authorize(Roles = "User")]
-        public IActionResult ParticipatedActivityById(int ActivityId, string UserName, int PersonsNumber)
+        public async Task<IActionResult> ParticipatedActivityById(Guid ActivityId)
         {
-            _activityService.ParticipatedActivityById( ActivityId,  UserName,  PersonsNumber, _userManager.GetUserName(User));
+            await _activityService.ParticipatedActivityById(
+                new ParticipatedActivityDto()
+                {
+                    ActivityId = ActivityId,
+                    UserId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier),
+                    PersonsNumber = 1
+                });
 
             return RedirectToAction("GetActivityInfoById", new { id = ActivityId });
         }
 
-        [HttpPost]
+        [HttpPost("CancelParticipatedActivityById")]
         [Authorize(Roles = "User")]
-        public IActionResult CancelParticipatedActivityById(int ActivityId, string UserName, int PersonsNumber)
+        public async Task<IActionResult> CancelParticipatedActivityById(Guid ActivityId)
         {
-
-            _activityService.CancelParticipatedActivityById(ActivityId, UserName, PersonsNumber, _userManager.GetUserName(User));
-
+            await _activityService.CancelParticipatedActivityById(
+                new CancelParticipatedActivityDto()
+                {
+                    ActivityId = ActivityId,
+                    UserId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier),
+                });
             return RedirectToAction("GetActivityInfoById", new { id = ActivityId });
         }
     }

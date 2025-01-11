@@ -4,6 +4,8 @@ namespace MVCPractice.ViewModels.Account
 {
     public class EditPasswordViewModel
     {
+        public string Id { get; set; }
+
         [Required(ErrorMessage = "請輸入帳號")]
         [StringLength(20, ErrorMessage = "{0} 長度必須介於 {2} 到 {1} 個字元之間。", MinimumLength = 6)]
         [Display(Name = "帳號")]

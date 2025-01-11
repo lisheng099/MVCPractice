@@ -3,7 +3,7 @@
 
 <h2>設定會員資料</h2>
 
-<form method="post" asp-action="EditProfile">
+<form method="post" asp-controller="Account" asp-action="EditProfile" asp-route-id="@Model.Id">
     <div asp-validation-summary="All" class="text-danger"></div>
     <div class="form-group">
         <label asp-for="UserName" class="control-label">帳號</label>
